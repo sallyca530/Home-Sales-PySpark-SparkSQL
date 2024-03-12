@@ -1,16 +1,20 @@
 # Home-Sales-PySpark-SparkSQL
 
+### Introduction
+Navigating this dynamic environment, the task at hand involves using SparkSQL skills to determine key metrics in home sales data, creating temporary views, partitioning data, and efficiently managing the caching and uncaching of tables, ensuring precision and efficiency in the world of Apache Spark and PySpark. 
 
-A Spark DataFrame is created from the dataset. (5 points)
+### Analysis
 
-![](images/Opt_3.png)
+#### A Spark DataFrame is created from the dataset.
+
+![](images/home_sales_df.png)
 
 
-A temporary table of the original DataFrame is created.  
+#### A temporary table of the original DataFrame is created.  
 
     home_sales_df.createOrReplaceTempView('home_sales')
 
-A query is written that returns the average price, rounded to two decimal places, for a four-bedroom house that was sold in each year. 
+#### A query is written that returns the average price, rounded to two decimal places, for a four-bedroom house that was sold in each year. 
 
     spark.sql("""
             SELECT YEAR(date),
@@ -22,9 +26,9 @@ A query is written that returns the average price, rounded to two decimal places
             ORDER BY Year(date) ASC
             """).show()
 
-![](images/Opt_3.png)
+![](images/3_home_sales.png)
 
-A query is written that returns the average price, rounded to two decimal places, of a home that has three bedrooms and three bathrooms for each year the home was built. 
+#### A query is written that returns the average price, rounded to two decimal places, of a home that has three bedrooms and three bathrooms for each year the home was built. 
 
     spark.sql("""
             SELECT YEAR(date_built) AS date_built,
@@ -36,7 +40,9 @@ A query is written that returns the average price, rounded to two decimal places
             ORDER BY date_built ASC
             """).show()
 
-A query is written that returns the average price of a home with three bedrooms, three bathrooms, two floors, and is greater than or equal to 2,000 square feet for each year the home was built rounded to two decimal places. 
+![](images/4_home_sales.png)            
+
+#### A query is written that returns the average price of a home with three bedrooms, three bathrooms, two floors, and is greater than or equal to 2,000 square feet for each year the home was built rounded to two decimal places. 
 
     spark.sql("""
             SELECT YEAR(date_built) AS date_built,
@@ -47,18 +53,58 @@ A query is written that returns the average price of a home with three bedrooms,
             And floors==2
             And sqft_living>=2000
             GROUP BY YEAR(date_built)
-            ORDER BY date_built ASC""").show()
+            ORDER BY date_built ASC
+            """).show()
 
-A query is written that returns the average price of a home per "view" rating having an average home price greater than or equal to $350,000, rounded to two decimal places. (The output shows the run time for this query.) (10 points)
+![](images/5_home_sales.png)
 
-A cache of the temporary "home_sales" table is created and validated. (10 points)
+#### A query is written that returns the average price of a home per "view" rating having an average home price greater than or equal to $350,000, rounded to two decimal places. (The output shows the run time for this query.) 
 
-The query from step 6 is run on the cached temporary table, and the run time is computed. (10 points)
+    spark.sql("""
+            SELECT ROUND(AVG(price), 2) AS AveragePrice, view
+            FROM home_sales
+            WHERE price >= 350000
+            GROUP BY view
+            ORDER BY view DESC
+            """).show()
 
-A partition of the home sales dataset by the "date_built" field is created, and the formatted parquet data is read. (10 points)
+![](images/6_home_sales.png)
 
-A temporary table of the parquet data is created. (10 points)
+![](images/6_uncached.png)
 
-The query from step 6 is run on the parquet temporary table, and the run time is computed. (10 points)
+#### A cache of the temporary "home_sales" table is created and validated.
 
-The "home_sales" temporary table is uncached and verified. (10 points)
+    spark.sql('cache table home_sales')
+
+ ![](images/8_home_sales.png)   
+
+#### The query from step 6 is run on the cached temporary table, and the run time is computed. 
+
+![](images/9_cached.png) 
+
+#### A partition of the home sales dataset by the "date_built" field is created, and the formatted parquet data is read.
+
+    home_sales_df.write.parquet('parquet_home_sales', mode='overwrite')
+    p_df=spark.read.parquet('parquet_home_sales')
+
+#### A temporary table of the parquet data is created. 
+
+    p_df.createOrReplaceTempView('p_homes_sales')
+
+#### The query from step 6 is run on the parquet temporary table, and the run time is computed. 
+
+    spark.sql("""
+            SELECT ROUND(AVG(price), 2) AS AveragePrice, view
+            FROM p_homes_sales
+            WHERE price >= 350000
+            GROUP BY view
+            ORDER BY view DESC
+            """).show()
+
+![](images/13_partitioned.png)
+
+#### The "home_sales" temporary table is uncached and verified. 
+
+    spark.sql('uncache table home_sales')
+
+![](images/15_uncached.png)
