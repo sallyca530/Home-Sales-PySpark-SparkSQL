@@ -1,9 +1,9 @@
 # Home-Sales-PySpark-SparkSQL
 
-### Introduction
+##  **Introduction**
 Navigating this dynamic environment, the task at hand involves using SparkSQL skills to determine key metrics in home sales data, creating temporary views, partitioning data, and efficiently managing the caching and uncaching of tables, ensuring precision and efficiency in the world of Apache Spark and PySpark. 
 
-### Analysis
+## **Analysis**
 
 #### A Spark DataFrame is created from the dataset.
 
@@ -58,7 +58,7 @@ Navigating this dynamic environment, the task at hand involves using SparkSQL sk
 
 ![](images/5_home_sales.png)
 
-#### A query is written that returns the average price of a home per "view" rating having an average home price greater than or equal to $350,000, rounded to two decimal places. (The output shows the run time for this query.) 
+#### A query is written that returns the average price of a home per "view" rating having an average home price greater than or equal to $350,000, rounded to two decimal places. The output shows the run time for this query 1.25. 
 
     spark.sql("""
             SELECT ROUND(AVG(price), 2) AS AveragePrice, view
@@ -78,7 +78,7 @@ Navigating this dynamic environment, the task at hand involves using SparkSQL sk
 
  ![](images/8_home_sales.png)   
 
-#### The query from step 6 is run on the cached temporary table, and the run time is computed. 
+#### The query from previous step is run on the *cached temporary table*, and the run time is computed with a better efficiency of 0.47 seconds.  
 
 ![](images/9_cached.png) 
 
@@ -91,7 +91,7 @@ Navigating this dynamic environment, the task at hand involves using SparkSQL sk
 
     p_df.createOrReplaceTempView('p_homes_sales')
 
-#### The query from step 6 is run on the parquet temporary table, and the run time is computed. 
+#### The same query is run on the parquet temporary table, and the run time is computed with efficiency of 0.88 seconds.  
 
     spark.sql("""
             SELECT ROUND(AVG(price), 2) AS AveragePrice, view
@@ -108,3 +108,6 @@ Navigating this dynamic environment, the task at hand involves using SparkSQL sk
     spark.sql('uncache table home_sales')
 
 ![](images/15_uncached.png)
+
+## Results
+In this dataset, the most efficient runtime was the *cached temporary table* without the partitioned field. However, this difference is negligible. The results show that using a cached table is best practice when using queries on large datasets.
